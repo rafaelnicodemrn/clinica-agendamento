@@ -1,0 +1,134 @@
+<h1 class="h3 mb-1">{{ consultaId ? 'Remarcar consulta' : 'Agendar consulta' }}</h1>
+<p class="text-muted">Escolha o paciente, o profissional e um horário livre na agenda.</p>
+
+@if (erro()) {
+  <div class="alert alert-danger">{{ erro() }}</div>
+}
+
+<div class="row g-4">
+  <!-- coluna da esquerda: escolhas (paciente, especialidade, profissional, data) -->
+  <div class="col-lg-5">
+    <div class="card shadow-sm">
+      <div class="card-body vstack gap-3">
+        <div>
+          <label class="form-label" for="paciente">Paciente</label>
+          <select id="paciente" class="form-select" name="paciente" [(ngModel)]="pacienteId">
+            <option [ngValue]="null">Selecione...</option>
+            @for (p of pacientes(); track p.id) {
+              <option [ngValue]="p.id">{{ p.nome }}</option>
+            }
+          </select>
+          @if (pacientes().length === 0) {
+            <div class="form-text">
+              Nenhum paciente cadastrado. <a routerLink="/pacientes/novo">Cadastrar paciente</a>
+            </div>
+          }
+        </div>
+
+        <div>
+          <label class="form-label" for="especialidade">Especialidade</label>
+          <select
+            id="especialidade"
+            class="form-select"
+            name="especialidade"
+            [(ngModel)]="especialidade"
+            (ngModelChange)="mudouEspecialidade()"
+          >
+            <option value="">Todas</option>
+            @for (e of especialidades(); track e) {
+              <option [value]="e">{{ e }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="profissional">Profissional</label>
+          <select
+            id="profissional"
+            class="form-select"
+            name="profissional"
+            [(ngModel)]="profissionalId"
+            (ngModelChange)="carregarAgenda()"
+          >
+            <option [ngValue]="null">Selecione...</option>
+            <!-- só os ativos e da especialidade escolhida acima -->
+            @for (p of profissionaisFiltrados; track p.id) {
+              <option [ngValue]="p.id">{{ p.nome }} — {{ p.especialidade }}</option>
+            }
+          </select>
+        </div>
+
+        <div>
+          <label class="form-label" for="data">Data</label>
+          <input
+            id="data"
+            type="date"
+            class="form-control"
+            name="data"
+            [min]="minimo"
+            [(ngModel)]="data"
+            (ngModelChange)="carregarAgenda()"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- coluna da direita: agenda do dia e botão de confirmar -->
+  <div class="col-lg-7">
+    <div class="card shadow-sm">
+      <div class="card-header">
+        Horários
+        @if (profissionalAtual; as prof) {
+          de <strong>{{ prof.nome }}</strong>
+        }
+      </div>
+      <div class="card-body">
+        @if (!profissionalId) {
+          <p class="text-muted mb-0">Selecione um profissional para ver a agenda.</p>
+        } @else if (horarios().length === 0) {
+          <p class="text-muted mb-0">Sem atendimento nesta data (fim de semana).</p>
+        } @else {
+          <!-- grade de horarios: verde = livre, verde cheio = escolhido, cinza = ocupado/passou -->
+          <div class="d-flex flex-wrap gap-2">
+            @for (h of horarios(); track h.dataHora) {
+              <button
+                type="button"
+                class="btn slot"
+                [class.btn-outline-success]="h.disponivel && h.dataHora !== horarioSelecionado"
+                [class.btn-success]="h.dataHora === horarioSelecionado"
+                [class.btn-outline-secondary]="!h.disponivel"
+                [disabled]="!h.disponivel"
+                (click)="selecionar(h)"
+              >
+                {{ hora(h) }}
+              </button>
+            }
+          </div>
+          <div class="form-text mt-2">Horários desabilitados já estão ocupados ou passaram.</div>
+        }
+
+        <hr />
+        <div class="mb-3">
+          <label class="form-label" for="obs">Observações (opcional)</label>
+          <textarea
+            id="obs"
+            class="form-control"
+            name="obs"
+            rows="2"
+            maxlength="500"
+            [(ngModel)]="observacoes"
+          ></textarea>
+        </div>
+        <div class="d-flex justify-content-end gap-2">
+          @if (consultaId) {
+            <a class="btn btn-outline-secondary" routerLink="/consultas">Cancelar</a>
+          }
+          <button class="btn btn-primary" type="button" [disabled]="!podeConfirmar" (click)="confirmar()">
+            {{ consultaId ? 'Confirmar remarcação' : 'Marcar consulta' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

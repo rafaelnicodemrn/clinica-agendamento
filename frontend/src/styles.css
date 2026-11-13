@@ -1,0 +1,11 @@
+body {
+  background-color: #f4f7f9;
+}
+
+main {
+  padding-bottom: 2rem;
+}
+
+.slot {
+  min-width: 5.5rem;
+}

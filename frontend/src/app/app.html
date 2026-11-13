@@ -1,0 +1,41 @@
+<header>
+  <nav class="navbar navbar-expand-md navbar-dark bg-primary mb-4">
+    <div class="container">
+      <a class="navbar-brand" routerLink="/agenda">{{ titulo }}</a>
+
+      <button
+        class="navbar-toggler"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#menuPrincipal"
+        aria-controls="menuPrincipal"
+        aria-label="Abrir menu"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse" id="menuPrincipal">
+        <ul class="navbar-nav ms-auto">
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/pacientes" routerLinkActive="active">1. Pacientes</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/profissionais" routerLinkActive="active"
+              >2. Profissionais</a
+            >
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/agenda" routerLinkActive="active">3. Agendar</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" routerLink="/consultas" routerLinkActive="active">Consultas</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+</header>
+
+<main class="container">
+  <router-outlet />
+</main>
