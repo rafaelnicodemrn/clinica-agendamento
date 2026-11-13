@@ -1,0 +1,61 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Pacientes</h1>
+  <a class="btn btn-primary" routerLink="/pacientes/novo">Novo paciente</a>
+</div>
+
+<!-- busca: o enter ou o botao chamam carregarPacientes() de novo com o texto digitado -->
+<form class="input-group mb-3" (ngSubmit)="carregarPacientes()">
+  <input
+    type="search"
+    class="form-control"
+    name="busca"
+    placeholder="Buscar por nome"
+    [(ngModel)]="busca"
+  />
+  <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+</form>
+
+@if (mensagemErro) {
+  <div class="alert alert-danger">{{ mensagemErro }}</div>
+}
+
+<div class="card shadow-sm">
+  <!-- table-responsive deixa a tabela rolar pro lado no celular -->
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr>
+          <th>Nome</th>
+          <th>CPF</th>
+          <th>Nascimento</th>
+          <th>Telefone</th>
+          <th>E-mail</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (paciente of pacientes; track paciente.id) {
+          <tr>
+            <td>{{ paciente.nome }}</td>
+            <td>{{ formatarCpf(paciente.cpf) }}</td>
+            <td>{{ paciente.dataNascimento | date: 'dd/MM/yyyy' }}</td>
+            <td>{{ paciente.telefone }}</td>
+            <td>{{ paciente.email }}</td>
+            <td class="text-end text-nowrap">
+              <!-- ja abre a agenda com esse paciente escolhido -->
+              <a class="btn btn-sm btn-outline-success me-1" routerLink="/agenda" [queryParams]="{ pacienteId: paciente.id }">Agendar</a>
+              <a class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/pacientes', paciente.id, 'editar']">Editar</a>
+              <button class="btn btn-sm btn-outline-danger" type="button" (click)="excluir(paciente)">Excluir</button>
+            </td>
+          </tr>
+        } @empty {
+          <tr>
+            <td colspan="6" class="text-center text-muted py-4">
+              {{ carregando ? 'Carregando...' : 'Nenhum paciente cadastrado.' }}
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+</div>

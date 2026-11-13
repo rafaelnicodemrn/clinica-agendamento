@@ -1,0 +1,48 @@
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">Profissionais e especialidades</h1>
+  <a class="btn btn-primary" routerLink="/profissionais/novo">Novo profissional</a>
+</div>
+
+<div class="mb-3">
+  <label class="form-label" for="filtro">Filtrar por especialidade</label>
+  <select id="filtro" class="form-select" name="filtro" [(ngModel)]="filtro" (ngModelChange)="carregarProfissionais()">
+    <option value="">Todas</option>
+    @for (especialidade of especialidades; track especialidade) {
+      <option [value]="especialidade">{{ especialidade }}</option>
+    }
+  </select>
+</div>
+
+@if (mensagemErro) {
+  <div class="alert alert-danger">{{ mensagemErro }}</div>
+}
+
+<!-- grid do bootstrap: 1 card por linha no celular, 2 no tablet e 3 no desktop -->
+<div class="row g-3">
+  @for (profissional of profissionais; track profissional.id) {
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100 shadow-sm">
+        <div class="card-body">
+          <div class="d-flex justify-content-between align-items-start">
+            <h2 class="h5 card-title">{{ profissional.nome }}</h2>
+            <span class="badge" [class]="profissional.ativo ? 'text-bg-success' : 'text-bg-secondary'">
+              {{ profissional.ativo ? 'Ativo' : 'Inativo' }}
+            </span>
+          </div>
+          <p class="mb-1"><span class="badge text-bg-info">{{ profissional.especialidade }}</span></p>
+          <p class="mb-0 small text-muted">{{ profissional.registro }}<br />{{ profissional.email }}</p>
+        </div>
+        <div class="card-footer d-flex flex-wrap gap-2 justify-content-end">
+          <!-- inativo nao aceita consulta, entao nem mostra o botao -->
+          @if (profissional.ativo) {
+            <a class="btn btn-sm btn-success" routerLink="/agenda" [queryParams]="{ profissionalId: profissional.id }">Ver agenda</a>
+          }
+          <a class="btn btn-sm btn-outline-primary" [routerLink]="['/profissionais', profissional.id, 'editar']">Editar</a>
+          <button class="btn btn-sm btn-outline-danger" type="button" (click)="excluir(profissional)">Excluir</button>
+        </div>
+      </div>
+    </div>
+  } @empty {
+    <div class="col-12 text-center text-muted py-4">Nenhum profissional encontrado.</div>
+  }
+</div>

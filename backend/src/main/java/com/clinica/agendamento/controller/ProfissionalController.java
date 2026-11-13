@@ -5,9 +5,10 @@ import com.clinica.agendamento.service.ProfissionalService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Controller dos profissionais - segunda etapa (lista de profissionais/especialidades)
+// Controller dos profissionais - etapa 2 (lista de profissionais e especialidades)
 @RestController
 @RequestMapping("/api/profissionais")
 public class ProfissionalController {
@@ -18,38 +19,44 @@ public class ProfissionalController {
         this.service = service;
     }
 
-    // GET /api/profissionais?especialidade=Cardiologia  (sem o parametro traz todos)
+    // GET /api/profissionais?especialidade=Cardiologia (sem parametro traz todos)
     @GetMapping
     public List<Profissional> listar(@RequestParam(required = false) String especialidade) {
         return service.listar(especialidade);
     }
 
-    // Lista só os nomes das especialidades, pra preencher o select do filtro no front
-    // obs: tem que ficar antes do /{id}, se não o spring tentaria converter "especialidades" em numero
+    // so os nomes das especialidades, pro select de filtro do front.
+    // fica antes do /{id} pra nao confundir "especialidades" com um id
     @GetMapping("/especialidades")
-    public List<String> especialidades() {
-        return service.especialidades();
+    public List<String> listarEspecialidades() {
+        return service.listarEspecialidades();
     }
 
     @GetMapping("/{id}")
-    public Profissional buscar(@PathVariable Long id) {
-        return service.buscar(id);
+    public ResponseEntity<Profissional> buscar(@PathVariable Long id) {
+        return service.buscar(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Profissional criar(@Valid @RequestBody Profissional profissional) {
-        return service.criar(profissional);
+    public ResponseEntity<Profissional> criar(@Valid @RequestBody Profissional profissional) {
+        Profissional salvo = service.salvar(profissional);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salvo);
     }
 
     @PutMapping("/{id}")
-    public Profissional atualizar(@PathVariable Long id, @Valid @RequestBody Profissional profissional) {
-        return service.atualizar(id, profissional);
+    public ResponseEntity<Profissional> atualizar(@PathVariable Long id, @Valid @RequestBody Profissional dados) {
+        return service.atualizar(id, dados)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void excluir(@PathVariable Long id) {
-        service.excluir(id);
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!service.excluir(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }

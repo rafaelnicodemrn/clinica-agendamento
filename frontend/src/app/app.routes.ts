@@ -1,70 +1,32 @@
 import { Routes } from '@angular/router';
 
-// Rotas (telas) do sistema, na ordem do fluxo:
-// 1. pacientes  ->  2. profissionais  ->  3. agenda (marcar)  ->  consultas (acompanhar)
-// loadComponent carrega a tela só quando o usuario entra nela (lazy loading)
+import { Agenda } from './componentes/agenda/agenda';
+import { ConsultaLista } from './componentes/consulta-lista/consulta-lista';
+import { PacienteForm } from './componentes/paciente-form/paciente-form';
+import { PacienteLista } from './componentes/paciente-lista/paciente-lista';
+import { ProfissionalForm } from './componentes/profissional-form/profissional-form';
+import { ProfissionalLista } from './componentes/profissional-lista/profissional-lista';
+
+// Rotas na ordem do fluxo:
+// 1. pacientes -> 2. profissionais -> 3. agenda (marcar) -> consultas (acompanhar)
 export const routes: Routes = [
   { path: '', redirectTo: 'agenda', pathMatch: 'full' },
 
-  // ---- 1. Pacientes ----
-  {
-    path: 'pacientes',
-    title: 'Pacientes',
-    loadComponent: () =>
-      import('./features/pacientes/paciente-lista/paciente-lista').then((m) => m.PacienteLista),
-  },
-  {
-    path: 'pacientes/novo',
-    title: 'Novo paciente',
-    loadComponent: () =>
-      import('./features/pacientes/paciente-form/paciente-form').then((m) => m.PacienteForm),
-  },
-  {
-    // mesmo formulario do "novo", ele ve se tem :id na rota pra saber que é edição
-    path: 'pacientes/:id/editar',
-    title: 'Editar paciente',
-    loadComponent: () =>
-      import('./features/pacientes/paciente-form/paciente-form').then((m) => m.PacienteForm),
-  },
+  // 1. pacientes
+  { path: 'pacientes', component: PacienteLista },
+  { path: 'pacientes/novo', component: PacienteForm },
+  // mesmo formulario do cadastro, ele ve o :id na rota e sabe que é edicao
+  { path: 'pacientes/:id/editar', component: PacienteForm },
 
-  // ---- 2. Profissionais ----
-  {
-    path: 'profissionais',
-    title: 'Profissionais',
-    loadComponent: () =>
-      import('./features/profissionais/profissional-lista/profissional-lista').then(
-        (m) => m.ProfissionalLista,
-      ),
-  },
-  {
-    path: 'profissionais/novo',
-    title: 'Novo profissional',
-    loadComponent: () =>
-      import('./features/profissionais/profissional-form/profissional-form').then(
-        (m) => m.ProfissionalForm,
-      ),
-  },
-  {
-    path: 'profissionais/:id/editar',
-    title: 'Editar profissional',
-    loadComponent: () =>
-      import('./features/profissionais/profissional-form/profissional-form').then(
-        (m) => m.ProfissionalForm,
-      ),
-  },
+  // 2. profissionais
+  { path: 'profissionais', component: ProfissionalLista },
+  { path: 'profissionais/novo', component: ProfissionalForm },
+  { path: 'profissionais/:id/editar', component: ProfissionalForm },
 
-  // ---- 3. Agenda e consultas ----
-  {
-    path: 'agenda',
-    title: 'Agendar consulta',
-    loadComponent: () => import('./features/agenda/agenda').then((m) => m.Agenda),
-  },
-  {
-    path: 'consultas',
-    title: 'Consultas',
-    loadComponent: () => import('./features/consultas/consulta-lista').then((m) => m.ConsultaLista),
-  },
+  // 3. agenda e consultas
+  { path: 'agenda', component: Agenda },
+  { path: 'consultas', component: ConsultaLista },
 
-  // qualquer rota que nao existe volta pra agenda
+  // rota que nao existe volta pra agenda
   { path: '**', redirectTo: 'agenda' },
 ];

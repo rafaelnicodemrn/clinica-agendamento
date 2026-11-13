@@ -1,0 +1,63 @@
+<h1 class="h3 mb-3">{{ id ? 'Editar profissional' : 'Novo profissional' }}</h1>
+
+@if (mensagemErro) {
+  <div class="alert alert-danger">{{ mensagemErro }}</div>
+}
+
+<form class="card shadow-sm" [formGroup]="formProfissional" (ngSubmit)="salvar()" novalidate>
+  <div class="card-body row g-3">
+    <div class="col-12">
+      <label class="form-label" for="nome">Nome</label>
+      <input id="nome" type="text" class="form-control" formControlName="nome"
+        [class.is-invalid]="nome.touched && nome.invalid" />
+      @if (nome.touched && nome.invalid) {
+        <div class="invalid-feedback">Informe o nome (mínimo 3 caracteres).</div>
+      }
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="especialidade">Especialidade</label>
+      <!-- o datalist sugere as especialidades que ja existem, mas da pra digitar uma nova -->
+      <input id="especialidade" type="text" class="form-control" formControlName="especialidade" list="listaEspecialidades"
+        [class.is-invalid]="especialidade.touched && especialidade.invalid" />
+      <datalist id="listaEspecialidades">
+        @for (item of especialidades; track item) {
+          <option [value]="item"></option>
+        }
+      </datalist>
+      @if (especialidade.touched && especialidade.invalid) {
+        <div class="invalid-feedback">Informe a especialidade.</div>
+      }
+    </div>
+
+    <div class="col-md-6">
+      <label class="form-label" for="registro">Registro profissional (CRM)</label>
+      <input id="registro" type="text" class="form-control" formControlName="registro"
+        [class.is-invalid]="registro.touched && registro.invalid" />
+      @if (registro.touched && registro.invalid) {
+        <div class="invalid-feedback">Informe o registro (máximo 20 caracteres).</div>
+      }
+    </div>
+
+    <div class="col-md-8">
+      <label class="form-label" for="email">E-mail</label>
+      <input id="email" type="email" class="form-control" formControlName="email"
+        [class.is-invalid]="email.touched && email.invalid" />
+      @if (email.touched && email.invalid) {
+        <div class="invalid-feedback">Informe um e-mail válido.</div>
+      }
+    </div>
+
+    <div class="col-md-4 d-flex align-items-end">
+      <div class="form-check form-switch">
+        <input id="ativo" type="checkbox" class="form-check-input" formControlName="ativo" />
+        <label class="form-check-label" for="ativo">Aceita agendamentos</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="card-footer d-flex justify-content-end gap-2">
+    <a class="btn btn-outline-secondary" routerLink="/profissionais">Cancelar</a>
+    <button class="btn btn-primary" type="submit" [disabled]="salvando">Salvar</button>
+  </div>
+</form>

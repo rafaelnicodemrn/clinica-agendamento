@@ -11,10 +11,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-// Controller das consultas - terceira etapa (agenda e marcação)
-// É o que junta paciente + profissional
+// Controller das consultas - etapa 3 (agenda e marcacao)
+// é o que junta o paciente com o profissional
 @RestController
 @RequestMapping("/api/consultas")
 public class ConsultaController {
@@ -25,7 +26,7 @@ public class ConsultaController {
         this.service = service;
     }
 
-    // Lista com filtros opcionais, ex: /api/consultas?profissionalId=1&status=AGENDADA
+    // lista com filtros opcionais, ex: /api/consultas?profissionalId=1&status=AGENDADA
     @GetMapping
     public List<Consulta> listar(@RequestParam(required = false) Long profissionalId,
             @RequestParam(required = false) Long pacienteId,
@@ -33,8 +34,8 @@ public class ConsultaController {
         return service.listar(profissionalId, pacienteId, status);
     }
 
-    // Agenda do dia de um profissional: /api/consultas/agenda?profissionalId=1&data=2026-11-23
-    // devolve cada horario com disponivel true/false
+    // agenda do dia: /api/consultas/agenda?profissionalId=1&data=2026-11-23
+    // volta cada horario com disponivel true/false
     @GetMapping("/agenda")
     public List<HorarioDisponivel> agenda(@RequestParam Long profissionalId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate data) {
@@ -42,32 +43,41 @@ public class ConsultaController {
     }
 
     @GetMapping("/{id}")
-    public Consulta buscar(@PathVariable Long id) {
-        return service.buscar(id);
+    public ResponseEntity<Consulta> buscar(@PathVariable Long id) {
+        return service.buscar(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // Marca a consulta. Aqui recebe um ConsultaRequest (só os ids + data) e não a entidade inteira
+    // marcar consulta. Aqui o corpo é um ConsultaRequest (so os ids + data),
+    // nao a entidade inteira
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Consulta agendar(@Valid @RequestBody ConsultaRequest request) {
-        return service.agendar(request);
+    public ResponseEntity<Consulta> agendar(@Valid @RequestBody ConsultaRequest request) {
+        Consulta salva = service.agendar(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(salva);
     }
 
-    // Remarcar = trocar data/hora (ou profissional) de uma consulta que ainda nao aconteceu
+    // remarcar = trocar a data/hora (ou o profissional) de uma consulta que ainda nao aconteceu
     @PutMapping("/{id}")
-    public Consulta reagendar(@PathVariable Long id, @Valid @RequestBody ConsultaRequest request) {
-        return service.reagendar(id, request);
+    public ResponseEntity<Consulta> reagendar(@PathVariable Long id, @Valid @RequestBody ConsultaRequest request) {
+        return service.reagendar(id, request)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // PATCH porque muda só um campo (o status): confirmar, realizada ou cancelar
+    // PATCH porque muda so um campo, o status (confirmar, realizada, cancelar)
     @PatchMapping("/{id}/status")
-    public Consulta alterarStatus(@PathVariable Long id, @Valid @RequestBody StatusRequest request) {
-        return service.alterarStatus(id, request.status());
+    public ResponseEntity<Consulta> alterarStatus(@PathVariable Long id, @Valid @RequestBody StatusRequest request) {
+        return service.alterarStatus(id, request.status())
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void excluir(@PathVariable Long id) {
-        service.excluir(id);
+    public ResponseEntity<Void> excluir(@PathVariable Long id) {
+        if (!service.excluir(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.noContent().build();
     }
 }

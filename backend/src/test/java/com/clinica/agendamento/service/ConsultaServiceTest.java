@@ -18,9 +18,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+// Testes das regras de agendamento (sem banco: o repository e os outros services
+// sao "falsos", feitos com Mockito, assim testamos so a logica do ConsultaService)
 class ConsultaServiceTest {
 
     private ConsultaRepository repository;
@@ -42,13 +45,14 @@ class ConsultaServiceTest {
         profissional = new Profissional();
         profissional.setId(2L);
         profissional.setAtivo(true);
-        when(pacienteService.buscar(1L)).thenReturn(paciente);
-        when(profissionalService.buscar(2L)).thenReturn(profissional);
+        when(pacienteService.buscar(1L)).thenReturn(Optional.of(paciente));
+        when(profissionalService.buscar(2L)).thenReturn(Optional.of(profissional));
         when(repository.save(any(Consulta.class))).thenAnswer(i -> i.getArgument(0));
         when(repository.buscarDoProfissionalNoPeriodo(any(), any(), any(), any())).thenReturn(List.of());
         when(repository.buscarDoPacienteNoPeriodo(any(), any(), any(), any())).thenReturn(List.of());
     }
 
+    // proximo dia de semana a partir de amanha, pra o teste nao cair em sabado/domingo
     private LocalDateTime proximoDiaUtil(int hora, int minuto) {
         LocalDate d = LocalDate.now().plusDays(1);
         while (d.getDayOfWeek() == DayOfWeek.SATURDAY || d.getDayOfWeek() == DayOfWeek.SUNDAY) {
@@ -116,10 +120,17 @@ class ConsultaServiceTest {
     }
 
     @Test
+    void consultaInexistenteVoltaVazio() {
+        when(repository.findById(42L)).thenReturn(Optional.empty());
+        assertTrue(service.alterarStatus(42L, StatusConsulta.CONFIRMADA).isEmpty());
+        assertFalse(service.excluir(42L));
+    }
+
+    @Test
     void reagendarIgnoraAPropriaConsulta() {
         LocalDateTime horario = proximoDiaUtil(11, 0);
         Consulta existente = consultaExistente(5L, horario);
-        when(repository.findById(5L)).thenReturn(java.util.Optional.of(existente));
+        when(repository.findById(5L)).thenReturn(Optional.of(existente));
         when(repository.buscarDoProfissionalNoPeriodo(eq(2L), any(), any(), any())).thenReturn(List.of(existente));
         assertDoesNotThrow(() -> service.reagendar(5L, new ConsultaRequest(1L, 2L, horario, "mesmo horário")));
     }
@@ -128,14 +139,14 @@ class ConsultaServiceTest {
     void naoAlteraStatusDeConsultaCancelada() {
         Consulta c = consultaExistente(7L, proximoDiaUtil(9, 0));
         c.setStatus(StatusConsulta.CANCELADA);
-        when(repository.findById(7L)).thenReturn(java.util.Optional.of(c));
+        when(repository.findById(7L)).thenReturn(Optional.of(c));
         assertThrows(NegocioException.class, () -> service.alterarStatus(7L, StatusConsulta.CONFIRMADA));
     }
 
     @Test
     void naoMarcaConsultaFuturaComoRealizada() {
         Consulta c = consultaExistente(8L, proximoDiaUtil(9, 0));
-        when(repository.findById(8L)).thenReturn(java.util.Optional.of(c));
+        when(repository.findById(8L)).thenReturn(Optional.of(c));
         assertThrows(NegocioException.class, () -> service.alterarStatus(8L, StatusConsulta.REALIZADA));
     }
 

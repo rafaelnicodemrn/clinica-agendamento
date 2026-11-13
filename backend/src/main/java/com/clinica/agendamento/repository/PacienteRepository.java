@@ -4,15 +4,18 @@ import com.clinica.agendamento.model.Paciente;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-// Repositorio do paciente. O Spring Data cria o SQL sozinho a partir do nome do metodo
+// Repository do paciente. O JpaRepository ja traz save, findAll, findById, deleteById...
+// e os outros metodos o Spring Data monta o SQL sozinho pelo nome (query methods)
 public interface PacienteRepository extends JpaRepository<Paciente, Long> {
 
-    // select count(*) > 0 from paciente where cpf = ?
+    List<Paciente> findAllByOrderByNome();
+
+    // busca pelo pedaço do nome sem ligar pra maiuscula/minuscula (tipo LIKE '%maria%')
+    List<Paciente> findByNomeContainingIgnoreCaseOrderByNome(String nome);
+
+    // pra checar cpf repetido no cadastro
     boolean existsByCpf(String cpf);
 
-    // mesmo CPF mas em OUTRO paciente (usado na edição)
+    // na edicao: mesmo cpf mas em OUTRO paciente
     boolean existsByCpfAndIdNot(String cpf, Long id);
-
-    // busca parcial pelo nome, sem diferenciar maiuscula/minuscula (tipo um LIKE %nome%)
-    List<Paciente> findByNomeContainingIgnoreCaseOrderByNome(String nome);
 }
