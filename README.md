@@ -1,5 +1,7 @@
 # Clínica Saúde+ — Agendamento de Consultas
 
+![Java](https://img.shields.io/badge/Java-21-ED8B00?logo=openjdk&logoColor=white) ![Spring Boot](https://img.shields.io/badge/Spring%20Boot-4.1-6DB33F?logo=springboot&logoColor=white) ![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white) ![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+
 Trabalho bimestral (Angular + Spring Boot + PostgreSQL).
 **Autores:** Rafael Luiz Nicodem Ratti e Juliano Carra Rigon
 
