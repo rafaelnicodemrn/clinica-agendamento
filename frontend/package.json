@@ -46,5 +46,13 @@
     "karma-jasmine-html-reporter": "~2.1.0",
     "typescript": "~5.9.2"
   },
-  "description": "Front-end Angular da clinica: pacientes, profissionais e agenda de consultas"
+  "description": "Front-end Angular da clinica: pacientes, profissionais e agenda de consultas",
+  "overrides": {
+    "@angular/cli": {
+      "pacote": {
+        "glob": "^14.0.2",
+        "minimatch": "^11.0.1"
+      }
+    }
+  }
 }
